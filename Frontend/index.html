@@ -3,18 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CaseLoop Test UI</title>
+    <title>CaseLoop Civic Intelligence Suite</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            background: #fafafa;
+        }
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            background: #0066cc;
+            color: #fff;
+            border: none;
+            margin-top: 10px;
+        }
+        button:disabled {
+            background: #aaa;
+        }
+        pre {
+            white-space: pre-wrap;
+            background: #fff;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
-    <h2>Test the PDF Simplifier API</h2>
-    
-    <input type="file" id="pdfInput" accept="application/pdf" />
-    <button id="submitBtn">Simplify Document</button>
-    
-    <p id="statusText" style="color: blue;"></p>
-    <ul id="resultsList"></ul>
+    <div class="container">
+        <!-- Feature 1: PDF Simplifier -->
+        <div class="card">
+            <h2>📄 PDF Simplifier</h2>
+            <p>Upload complex civic/RTI documents to extract concise takeaways.</p>
+            <input type="file" id="pdfInput" accept="application/pdf" />
+            <br>
+            <button id="submitBtn">Simplify Document</button>
+            <p id="statusText" style="color: blue;"></p>
+            <ul id="resultsList"></ul>
+        </div>
 
-    <!-- Link to the logic file -->
+        <hr />
+
+        <!-- Feature 2: RTI Application Drafter -->
+        <div class="card">
+            <h2>📝 RTI Drafter</h2>
+            <p>Enter your issue or query to generate a complete RTI application draft.</p>
+            <textarea id="promptInput" rows="4" placeholder="Describe the information or problem you want to file an RTI for..."></textarea>
+            <br>
+            <button id="draftBtn">Generate RTI Draft</button>
+            <p id="draftStatusText" style="color: blue;"></p>
+            <div id="draftResultContainer" style="display: none;">
+                <h3>Generated Draft:</h3>
+                <pre id="draftResult"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link to client script -->
     <script src="app.js"></script>
 </body>
 </html>
