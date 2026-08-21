@@ -12,11 +12,15 @@ def generate_rti_draft(complaint_text: str, model_id: str = "CaseLoop/rti-format
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
-            max_new_tokens=256,
+            max_new_tokens=500,
             num_beams=4,
-            no_repeat_ngram_size=3,      # Prevents repeated loops
-            repetition_penalty=2.0,      # Penalizes word/phrase repetition
             early_stopping=True
         )
 
-    return tokenizer.decode(outputs[0], skip_special_tokens=True)
+    # Decode the text
+    raw_draft = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    
+    # Swap the special tags back to real newlines
+    formatted_draft = raw_draft.replace(' <br> ', '\n').replace('<br>', '\n')
+    
+    return formatted_draft
