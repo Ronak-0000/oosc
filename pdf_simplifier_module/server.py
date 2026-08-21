@@ -1,18 +1,23 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, T5Tokenizer
 import pymupdf
 import torch
 import tempfile
 import os
 import re
 
-# Uvicorn looks specifically for this variable name:
 app = FastAPI(title="Civic PDF Simplifier API")
 
 MODEL_REPO = "Ronak0/rti-pdf-simplifier"
+BASE_MODEL = "google/flan-t5-base"
 
-# Load tokenizer and model
-tokenizer = AutoTokenizer.from_pretrained(MODEL_REPO)
+# Load tokenizer from base FLAN-T5 to ensure complete SentencePiece vocabs are present
+try:
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_REPO, legacy=False)
+except Exception:
+    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, legacy=False)
+
+# Load your fine-tuned weights
 model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_REPO)
 model.eval()
 
