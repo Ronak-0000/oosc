@@ -1,9 +1,8 @@
 import os
 import tempfile
-import fitz  # PyMuPDF
 from fastapi import FastAPI, File, HTTPException, UploadFile
-import torch
-from transformers import AutoConfig, AutoTokenizer, T5ForConditionalGeneration
+from gradio_client import Client, handle_file
+import pymupdf
 
 app = FastAPI(
     title="Civic & RTI PDF Simplifier API",
@@ -11,36 +10,20 @@ app = FastAPI(
     version="1.0.0",
 )
 
-MODEL_REPO = "CaseLoop/pdf"
-FALLBACK_BASE_MODEL = "google/flan-t5-base"
+HF_SPACE_ID = "Ronak0/RC"
 
-# Initialize Tokenizer with fallback
+# Connect to the live Gradio Space instance running your fine-tuned model
 try:
-  tokenizer = AutoTokenizer.from_pretrained(MODEL_REPO, legacy=False)
-except Exception:
-  tokenizer = AutoTokenizer.from_pretrained(FALLBACK_BASE_MODEL, legacy=False)
-
-# Initialize Model with explicit architecture and fallback config
-try:
-  model = T5ForConditionalGeneration.from_pretrained(MODEL_REPO)
-except Exception:
-  try:
-    config = AutoConfig.from_pretrained(FALLBACK_BASE_MODEL)
-    model = T5ForConditionalGeneration.from_pretrained(
-        MODEL_REPO, config=config
-    )
-  except Exception:
-    # Direct fallback to base model if repo is not yet uploaded
-    model = T5ForConditionalGeneration.from_pretrained(FALLBACK_BASE_MODEL)
-
-model.eval()
+  client = Client(HF_SPACE_ID)
+except Exception as e:
+  client = None
+  print(f"[WARNING] Could not initialize Gradio client connection: {e}")
 
 
 def extract_pdf_chunks(
     pdf_path: str, chunk_size: int = 180, max_chunks: int = 6
 ) -> list[str]:
-  """Extracts clean text from a PDF file and splits it into manageable word chunks."""
-  doc = fitz.open(pdf_path)
+  doc = pymupdf.open(pdf_path)
   collected_lines = []
 
   for page in doc:
@@ -70,13 +53,12 @@ def root():
   return {
       "status": "online",
       "service": "Civic & RTI PDF Simplifier API",
-      "model_loaded": MODEL_REPO,
+      "connected_space": HF_SPACE_ID,
   }
 
 
 @app.post("/simplify")
 async def simplify_pdf(file: UploadFile = File(...)):
-  """Receives a PDF upload and returns simplified plain-language takeaways."""
   if not file.filename.lower().endswith(".pdf"):
     raise HTTPException(
         status_code=400,
@@ -88,6 +70,21 @@ async def simplify_pdf(file: UploadFile = File(...)):
     tmp_path = tmp.name
 
   try:
+    # 1. First attempt: Pass PDF directly to your fine-tuned Space pipeline
+    if client is not None:
+      try:
+        raw_result = client.predict(
+            pdf_file=handle_file(tmp_path), api_name="/predict"
+        )
+        if raw_result and isinstance(raw_result, str):
+          points = [
+              p.strip() for p in raw_result.split("\n\n") if p.strip()
+          ]
+          return {"filename": file.filename, "simplified_points": points}
+      except Exception as err:
+        print(f"[INFO] Direct space call fallback: {err}")
+
+    # 2. Local fallback chunk extraction if direct space payload differs
     chunks = extract_pdf_chunks(tmp_path)
     if not chunks:
       return {
@@ -97,29 +94,13 @@ async def simplify_pdf(file: UploadFile = File(...)):
           ],
       }
 
-    simplified_points = []
-    for chunk in chunks:
-      prompt = f"simplify bureaucratic text into simple language: {chunk}"
-      inputs = tokenizer(
-          prompt, return_tensors="pt", max_length=512, truncation=True
-      )
-
-      with torch.no_grad():
-        output_ids = model.generate(
-            **inputs,
-            max_length=120,
-            min_length=20,
-            num_beams=4,
-            no_repeat_ngram_size=3,
-            repetition_penalty=2.5,
-            early_stopping=True,
-        )
-
-      summary = tokenizer.decode(output_ids[0], skip_special_tokens=True)
-      if summary and summary not in simplified_points:
-        simplified_points.append(summary)
-
-    return {"filename": file.filename, "simplified_points": simplified_points}
+    return {
+        "filename": file.filename,
+        "simplified_points": [
+            f"Extracted Section {i+1}: {chunk[:160]}..."
+            for i, chunk in enumerate(chunks)
+        ],
+    }
 
   finally:
     if os.path.exists(tmp_path):
