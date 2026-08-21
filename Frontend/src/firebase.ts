@@ -33,7 +33,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const db = getFirestore(app, "ai-studio-caseloopcivicleg-08b98569-e99c-4378-837f-b8a4743d38d8");
 export const googleProvider = new GoogleAuthProvider();
 
 // --- Auth Exports expected by AuthContext.tsx ---
