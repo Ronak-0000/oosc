@@ -1,7 +1,6 @@
 import { LegalCase } from '../types';
 
-// Ensure this matches your actual Render Web Service backend URL:
-const BACKEND_BASE_URL = "https://caseloop.onrender.com";
+const BACKEND_BASE_URL = "https://caseloop.onrender.com"; // Ensure this matches your Render backend URL
 
 export interface AIAnalysisResponse {
   title: string;
@@ -33,6 +32,11 @@ export interface AIAnalysisResponse {
   appellateStrategy?: string[];
   statutoryClauses?: string[];
   recommendedExhibits?: string[];
+  
+  // NEW FIELDS FOR UI
+  civicRights?: string[];
+  draftedRti?: string;
+  pdfSummary?: string;
 }
 
 export interface RtiAuditResponse {
@@ -81,14 +85,29 @@ export interface OfficerSearchResult {
   portalUrl?: string;
 }
 
-// 1. Initial Grievance Analysis
-export async function analyzeIssueApi(prompt: string, city: string): Promise<AIAnalysisResponse> {
+// 1. Initial Grievance Analysis (Now supports File uploads)
+export async function analyzeIssueApi(prompt: string, city: string, file?: File): Promise<AIAnalysisResponse> {
   try {
-    const res = await fetch(`${BACKEND_BASE_URL}/draft`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: `[Jurisdiction: ${city}] ${prompt}` }),
-    });
+    let res;
+    
+    // If a PDF is attached, use FormData for a multipart request
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("prompt", `[Jurisdiction: ${city}] ${prompt}`);
+      
+      res = await fetch(`${BACKEND_BASE_URL}/simplify`, {
+        method: "POST",
+        body: formData,
+      });
+    } else {
+      // Standard JSON request for text-only
+      res = await fetch(`${BACKEND_BASE_URL}/draft`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: `[Jurisdiction: ${city}] ${prompt}` }),
+      });
+    }
 
     const text = await res.text();
     let data: any = {};
@@ -101,14 +120,21 @@ export async function analyzeIssueApi(prompt: string, city: string): Promise<AIA
     }
 
     return {
-      title: prompt.slice(0, 50) + "...",
+      title: prompt.slice(0, 50).replace("Document Attached: ", "") + "...",
       category: "Civic Redressal & Legal Notice",
       rulebookId: "rti",
       statute: "Right to Information Act 2005 § 6(1)",
       daysRemaining: 30,
       initialScore: 92,
-      legalDiagnosis: "Statutory parameters mapped and legal defense assessment prepared.",
+      legalDiagnosis: data.diagnosis || "Statutory parameters mapped and legal defense assessment prepared.",
       formalLetter: data.draft || text || "Draft generated successfully.",
+      draftedRti: data.draft || data.draftedRti || text || "Draft generated successfully.",
+      pdfSummary: file ? (data.summary || `Extracted statutory points from ${file.name}.`) : undefined,
+      civicRights: data.civicRights || [
+        "Right to seek certified public records under Section 6(1).",
+        "Mandatory 30-day response window for the public authority.",
+        "Right to file a First Appeal under Section 19 if denied or ignored."
+      ],
       facts: [{ label: "Primary Grievance", value: prompt }],
       officer: {
         name: "Public Information Officer / Competent Authority",
@@ -123,8 +149,9 @@ export async function analyzeIssueApi(prompt: string, city: string): Promise<AIA
     };
   } catch (err: any) {
     console.error("API error, using client fallback:", err);
+    // Robust fallback to prevent UI crashes if backend is spinning up
     return {
-      title: prompt.slice(0, 50) + "...",
+      title: prompt.slice(0, 50).replace("Document Attached: ", "") + "...",
       category: "Civic Redressal & Legal Notice",
       rulebookId: "rti",
       statute: "Right to Information Act 2005 § 6(1)",
@@ -132,6 +159,13 @@ export async function analyzeIssueApi(prompt: string, city: string): Promise<AIA
       initialScore: 90,
       legalDiagnosis: "Statutory rights mapped. Ready for filing draft inspection.",
       formalLetter: `FORMAL STATUTORY NOTICE\n\nTo,\nThe Designated Competent Authority,\n${city}\n\nSubject: Formal submission regarding: ${prompt}\n\nSir/Madam,\nI hereby submit this statutory notice demanding formal resolution and supply of certified records pursuant to applicable statutory provisions.\n\nYours faithfully,\nAuthorized Citizen`,
+      draftedRti: `FORMAL STATUTORY NOTICE\n\nTo,\nThe Designated Competent Authority,\n${city}\n\nSubject: Formal submission regarding: ${prompt}\n\nSir/Madam,\nI hereby submit this statutory notice demanding formal resolution and supply of certified records pursuant to applicable statutory provisions.\n\nYours faithfully,\nAuthorized Citizen`,
+      pdfSummary: file ? `Fallback Summary: Document "${file.name}" received for analysis.` : undefined,
+      civicRights: [
+        "Right to seek certified public records under Section 6(1).",
+        "Mandatory 30-day response window for the public authority.",
+        "Right to file a First Appeal under Section 19 if denied or ignored."
+      ],
       facts: [{ label: "User Submission", value: prompt }],
       officer: {
         name: "Public Information Officer",
