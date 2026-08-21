@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 app = FastAPI(title="Civic & RTI Hub API")
 
-# Allow frontend requests
+# Allow frontend cross-origin requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,20 +18,17 @@ app.add_middleware(
 
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-# Model 1: PDF Simplifier
+# Model 1: PDF Simplifier Space
 SIMPLIFIER_SPACE_ID = "Ronak0/RC"
 simplifier_client = Client(SIMPLIFIER_SPACE_ID, hf_token=HF_TOKEN)
 
-# Model 2: RTI Drafter (replace with your exact HF username/space-name)
+# Model 2: RTI Drafter Space
 DRAFTER_SPACE_ID = "Ronak0/rti-drafter"
 drafter_client = Client(DRAFTER_SPACE_ID, hf_token=HF_TOKEN)
 
 
 class DraftRequest(BaseModel):
   prompt: str
-
-
-# ================= Endpoints =================
 
 
 @app.post("/simplify")
