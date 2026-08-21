@@ -1,4 +1,4 @@
-// Base URL for your Render backend
+// Base URL for your live Render backend
 const BACKEND_BASE_URL = "https://caseloop.onrender.com";
 
 export interface AIAnalysisResponse {
@@ -34,7 +34,7 @@ export interface AIAnalysisResponse {
 }
 
 /**
- * Calls your backend PDF Simplifier endpoint
+ * Uploads a PDF file to your Render backend to extract plain-language takeaways.
  */
 export async function simplifyPdfFile(file: File): Promise<string[]> {
   const formData = new FormData();
@@ -58,7 +58,7 @@ export async function simplifyPdfFile(file: File): Promise<string[]> {
 }
 
 /**
- * Calls your backend RTI Drafter endpoint
+ * Sends a plain-language prompt to your Render backend to generate an RTI application draft.
  */
 export async function draftRtiApplication(prompt: string): Promise<string> {
   const response = await fetch(`${BACKEND_BASE_URL}/draft`, {
