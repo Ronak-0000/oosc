@@ -30,10 +30,10 @@ async def simplify_pdf(file: UploadFile = File(...)):
         tmp_path = tmp.name
 
     try:
-        # Forward to Hugging Face Space using fn_index=0 to bypass naming errors
+        # Forward to Hugging Face Space using the exact API name from the docs
         raw_result = client.predict(
-            handle_file(tmp_path), 
-            fn_index=0
+            pdf_file=handle_file(tmp_path),
+            api_name="/simplify_document"
         )
         
         # Parse the plain-language string back into a list
