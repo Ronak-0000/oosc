@@ -1,1 +1,22 @@
-// Training dataset (JSON array)
+[
+  {
+    "complex_text": "In accordance with Section 8(1)(j) of the Right to Information Act 2005, the disclosure of personal information which has no relationship to any public activity or interest, or which would cause unwarranted invasion of the privacy of the individual is hereby denied.",
+    "simple_text": "Your request was rejected because the law protects individual privacy. Personal details cannot be shared unless there is a clear and significant public benefit."
+  },
+  {
+    "complex_text": "The competent authority has accorded administrative approval and expenditure sanction amounting to Rs. 4,50,000 for periodic road overlay maintenance and drainage repairs under Ward 14.",
+    "simple_text": "The department officially approved spending Rs. 4.5 lakh to repair roads and fix drainage in Ward 14."
+  },
+  {
+    "complex_text": "As per Section 7(1) of the RTI Act, the requested information concerning life or liberty of a person shall be provided within forty-eight hours of the receipt of the request.",
+    "simple_text": "If an RTI request directly concerns a person's life or personal liberty, the government department must provide the information within 48 hours."
+  },
+  {
+    "complex_text": "The applicant is directed to deposit an additional fee of Rs. 50 calculated at Rs. 2 per page for 25 pages of documents under Rule 4 of the RTI Rules before records can be furnished.",
+    "simple_text": "You must pay an extra fee of Rs. 50 (Rs. 2 per page for 25 pages) before the office can release the requested documents."
+  },
+  {
+    "complex_text": "The grievance stands disposed of as the jurisdiction over encroachment removal on state highway land falls under the purview of the Public Works Department rather than the Municipal Corporation.",
+    "simple_text": "Your complaint was closed because clearing encroachments on the state highway is handled by the Public Works Department (PWD), not the local Municipal Corporation."
+  }
+]
