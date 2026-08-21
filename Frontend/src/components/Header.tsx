@@ -24,7 +24,6 @@ export const CITIES = [
   'Chandigarh',
 ];
 
-
 export const Header: React.FC<HeaderProps> = ({
   currentView,
   onNavigate,
@@ -66,7 +65,6 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
-  // Close dropdowns on outside click or Escape key
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -113,7 +111,7 @@ export const Header: React.FC<HeaderProps> = ({
     <>
       <header className="bg-white/95 backdrop-blur-md border-b border-[#E2E8F0] sticky top-0 z-50 transition-all duration-200">
         <div className="flex justify-between items-center w-full px-4 sm:px-8 md:px-10 max-w-[1280px] mx-auto h-16">
-          {/* Brand & Badges */}
+          {/* Brand & City Selector */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => onNavigate('home')}
@@ -126,7 +124,6 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             <div className="hidden md:flex items-center gap-2">
-              {/* City Selector Pill */}
               <div ref={cityMenuRef} className="relative">
                 <button
                   onClick={() => setShowCityMenu(!showCityMenu)}
@@ -166,32 +163,8 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Navigation Links */}
+          {/* Clean Single Navigation Link */}
           <nav className="flex items-center gap-3 sm:gap-6">
-            <button
-              onClick={() => onNavigate('home')}
-              className={`text-[13.5px] font-medium transition-colors cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg ${
-                currentView === 'home'
-                  ? 'text-[#006c4a] font-bold bg-[#F0FDF4]'
-                  : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
-              <span>Intake & Rulebooks</span>
-            </button>
-
-            <button
-              onClick={() => onNavigate('workspace')}
-              className={`text-[13.5px] font-medium transition-colors cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg ${
-                currentView === 'workspace'
-                  ? 'text-[#006c4a] font-bold bg-[#F0FDF4]'
-                  : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[18px]">edit_document</span>
-              <span>Workspace</span>
-            </button>
-
             <button
               onClick={() => onNavigate('my-filings')}
               className={`text-[13.5px] font-medium transition-colors cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg relative ${
@@ -210,9 +183,8 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </nav>
 
-          {/* Trailing Actions & Profile */}
+          {/* Notifications & Profile */}
           <div className="flex items-center gap-3">
-            {/* Notifications */}
             <div ref={notificationMenuRef} className="relative">
               <button
                 onClick={() => setShowNotificationMenu(!showNotificationMenu)}
@@ -251,7 +223,6 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </div>
 
-            {/* User Sign-In or Profile Avatar */}
             {loading ? (
               <div className="w-8 h-8 rounded-full bg-slate-200 animate-pulse"></div>
             ) : user ? (
@@ -294,7 +265,6 @@ export const Header: React.FC<HeaderProps> = ({
                       </div>
                     </div>
 
-                    {/* Email Verification Status */}
                     {user.email && (
                       <div className="mt-2 p-2 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] text-[11.5px]">
                         <div className="flex items-center justify-between">
@@ -337,11 +307,6 @@ export const Header: React.FC<HeaderProps> = ({
                     )}
 
                     <div className="mt-2 flex flex-col gap-1 text-[13px]">
-                      <div className="px-2 py-1 text-[11px] font-medium text-[#059669] bg-[#DCFCE7]/60 rounded flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-[14px]">cloud_sync</span>
-                        <span>Real-time Cloud Database Active</span>
-                      </div>
-
                       <button
                         onClick={() => {
                           onNavigate('my-filings');
@@ -351,17 +316,6 @@ export const Header: React.FC<HeaderProps> = ({
                       >
                         <span className="material-symbols-outlined text-[16px]">folder</span>
                         <span>My Cloud Filings ({filingsCount})</span>
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          onNavigate('workspace');
-                          setShowProfileMenu(false);
-                        }}
-                        className="w-full text-left px-2 py-1.5 hover:bg-[#F8FAFC] rounded text-[#334155] flex items-center gap-2 cursor-pointer"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">edit_note</span>
-                        <span>Current Draft Workspace</span>
                       </button>
 
                       <div className="border-t border-[#F1F5F9] my-1"></div>
@@ -394,7 +348,6 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </header>
 
-      {/* Auth Modal */}
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
