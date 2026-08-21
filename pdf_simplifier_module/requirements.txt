@@ -1,1 +1,9 @@
-# List of Python dependencies
+torch>=2.2.0
+transformers>=4.40.0
+datasets>=2.18.0
+evaluate>=0.4.1
+rouge_score>=0.1.2
+pymupdf>=1.24.0
+pypdf>=4.0.0
+sentencepiece>=0.2.0
+accelerate>=0.28.0
