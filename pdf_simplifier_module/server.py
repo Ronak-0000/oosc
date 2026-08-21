@@ -6,6 +6,7 @@ import tempfile
 import os
 import re
 
+# Uvicorn looks specifically for this variable name:
 app = FastAPI(title="Civic PDF Simplifier API")
 
 MODEL_REPO = "Ronak0/rti-pdf-simplifier"
