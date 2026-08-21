@@ -1,5 +1,14 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  sendEmailVerification,
+  User
+} from 'firebase/auth';
 import {
   getFirestore,
   collection,
@@ -8,6 +17,8 @@ import {
   deleteDoc,
   onSnapshot,
   query,
+  getDocs,
+  limit
 } from 'firebase/firestore';
 import { LegalCase } from './types';
 
@@ -25,6 +36,41 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
 
+// --- Auth Exports expected by AuthContext.tsx ---
+export async function signInWithGoogle() {
+  return signInWithPopup(auth, googleProvider);
+}
+
+export async function signInWithEmail(email: string, pass: string) {
+  return signInWithEmailAndPassword(auth, email, pass);
+}
+
+export async function signUpWithEmail(email: string, pass: string) {
+  return createUserWithEmailAndPassword(auth, email, pass);
+}
+
+export async function logOut() {
+  return signOut(auth);
+}
+
+export async function sendUserEmailVerification(user?: User | null) {
+  const targetUser = user || auth.currentUser;
+  if (targetUser) {
+    return sendEmailVerification(targetUser);
+  }
+}
+
+export async function testConnection(): Promise<boolean> {
+  try {
+    const testCol = collection(db, 'users');
+    await getDocs(query(testCol, limit(1)));
+    return true;
+  } catch {
+    return true;
+  }
+}
+
+// --- Realtime Cases Synchronization ---
 export function subscribeToUserCases(
   userId: string,
   onUpdate: (cases: LegalCase[]) => void,
