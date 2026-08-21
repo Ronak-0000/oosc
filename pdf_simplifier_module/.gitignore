@@ -1,0 +1,25 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Python Cache & Artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.ipynb_checkpoints
+
+# Model Checkpoints & Large Weights (Crucial to prevent GitHub rejection)
+models/
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# Data files & Raw PDFs (Keep your training JSONs if small, ignore raw heavy PDFs)
+data/raw/*.pdf
+
+# Environment variables & OS files
+.env
+.DS_Store
+Thumbs.db

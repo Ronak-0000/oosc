@@ -18,5 +18,125 @@
   {
     "complex_text": "The grievance stands disposed of as the jurisdiction over encroachment removal on state highway land falls under the purview of the Public Works Department rather than the Municipal Corporation.",
     "simple_text": "Your complaint was closed because clearing encroachments on the state highway is handled by the Public Works Department (PWD), not the local Municipal Corporation."
+  },
+  {
+    "complex_text": "The requested documents contain commercial confidence, trade secrets, and intellectual property protected under Section 8(1)(d) of the Act, disclosure of which would harm the competitive position of a third party.",
+    "simple_text": "The department denied your request because the documents contain private business secrets or financial details that could harm a company's market position."
+  },
+  {
+    "complex_text": "The public authority has failed to furnish the information within the mandatory statutory period of 30 days; therefore, as per Section 7(6), all information shall be provided free of any charge.",
+    "simple_text": "Because the department missed the 30-day deadline to reply, they are legally required to give you all requested records completely free of cost."
+  },
+  {
+    "complex_text": "The Commission observes that the CPIO has obstructed the supply of information without reasonable cause and hereby issues a Show Cause notice under Section 20(1) proposing a penalty of Rs. 250 per day.",
+    "simple_text": "The Information Commission found that the officer delayed the reply without a valid reason and is threatening a fine of Rs. 250 for every day of delay."
+  },
+  {
+    "complex_text": "Information is exempted under Section 8(1)(e) as the records are held in a fiduciary capacity and no larger public interest warranting the disclosure has been established by the appellant.",
+    "simple_text": "The information cannot be shared because it is held in professional trust (like a lawyer-client or bank-customer relationship) with no major public interest."
+  },
+  {
+    "complex_text": "The First Appellate Authority directs the Public Information Officer to provide point-wise certified copies of the muster rolls and measurement book within 10 days of receipt of this order.",
+    "simple_text": "The senior appeals officer ordered the department to hand over certified copies of worker attendance registers and project measurements within 10 days."
+  },
+  {
+    "complex_text": "The CPIO is directed to facilitate inspection of relevant files and records by the appellant on a mutually convenient date and provide up to 20 pages of certified extracts free of cost.",
+    "simple_text": "The department must let you visit their office to inspect the official files in person and give you 20 free printed pages of your choice."
+  },
+  {
+    "complex_text": "The requested information pertains to raw answer sheets and moderation formulas which are held in confidence to protect the integrity of the evaluation process under Section 8(1)(j).",
+    "simple_text": "The exam board refused to share exam answer keys or scoring formulas to protect the fairness and privacy of the evaluation process."
+  },
+  {
+    "complex_text": "The respondent public authority is directed to publish suo motu disclosures under Section 4(1)(b) on its official web portal within 30 days to ensure proactive transparency.",
+    "simple_text": "The government office was ordered to publish its budgets, staff details, and schemes publicly on its website within 30 days."
+  },
+  {
+    "complex_text": "The demand of Rs. 2,000 towards search and compilation charges is quashed as the RTI Rules only permit charges for actual photocopying and certified media reproduction.",
+    "simple_text": "The officer cannot charge you Rs. 2,000 for searching old files; by law, they can only charge for the actual cost of paper copies or digital media."
+  },
+  {
+    "complex_text": "The disclosure of information sought would impede the process of investigation and apprehension of offenders, hence attracted by the provisions of Section 8(1)(h).",
+    "simple_text": "Your request was denied because sharing these details right now would interfere with an ongoing police inquiry or help suspects escape."
+  },
+  {
+    "complex_text": "The application is transferred under Section 6(3) of the RTI Act to the Directorate of Education, as the subject matter pertains more closely to their administrative functions.",
+    "simple_text": "Your application was forwarded to the Education Department under Section 6(3) because this matter falls under their jurisdiction."
+  },
+  {
+    "complex_text": "The Commission directs the public authority to provide an affidavit on stamp paper affirming that the requested file has been traced as missing or destroyed as per record retention rules.",
+    "simple_text": "The department must give you an official sworn affidavit on legal stamp paper proving that the lost file was destroyed according to departmental rules."
+  },
+  {
+    "complex_text": "The CPIO has erroneously rejected the application on grounds of disproportionate diversion of resources under Section 7(9); the public authority is directed to provide available data.",
+    "simple_text": "The officer was wrong to claim that answering your request takes too much staff time. The department must provide whatever existing records they already have."
+  },
+  {
+    "complex_text": "The appellant is exempted from payment of application and copying fees upon producing a valid Below Poverty Line (BPL) ration card issued by the competent state authority.",
+    "simple_text": "You do not have to pay any application fees or document copying charges if you show a valid government-issued BPL card."
+  },
+  {
+    "complex_text": "Under Section 18 of the Act, a direct complaint may be filed before the Information Commission if the public authority refuses to accept an application or does not have an appointed CPIO.",
+    "simple_text": "You can file a direct complaint with the Information Commission under Section 18 if an office refuses to receive your RTI form or has no appointed RTI officer."
+  },
+  {
+    "complex_text": "The sought records contain cabinet papers including deliberations of the Council of Ministers, which cannot be disclosed until the decision has been taken and the matter is complete under Section 8(1)(i).",
+    "simple_text": "Internal ministerial and cabinet discussions cannot be shared while a decision is still pending. They can only be accessed after a final order is issued."
+  },
+  {
+    "complex_text": "The public authority is instructed to redact personal identifiers including mobile numbers, residential addresses, and bank accounts under Section 10 (severability clause) before disclosure.",
+    "simple_text": "The department must black out private details like phone numbers and bank account info under Section 10, but still release the rest of the document."
+  },
+  {
+    "complex_text": "The respondent authority is directed to refund the excess demand of Rs. 650 collected from the appellant toward inspection charges, as the first hour of inspection is legally free of cost.",
+    "simple_text": "The office must refund Rs. 650 to you because the first hour of reviewing official records in person is completely free."
+  },
+  {
+    "complex_text": "The information sought relates to a dispute pending adjudication before a competent Court of Law, and disclosure has been expressly forbidden by judicial injunction under Section 8(1)(b).",
+    "simple_text": "The department cannot provide this information because a court judge has explicitly banned its public release during a trial."
+  },
+  {
+    "complex_text": "The Commission awards compensation of Rs. 5,000 to the appellant under Section 19(8)(b) for the harassment and detriment suffered due to misleading information provided by the CPIO.",
+    "simple_text": "The Information Commission awarded you Rs. 5,000 in compensation because the department caused you harassment by giving misleading replies."
+  },
+  {
+    "complex_text": "The CPIO is cautioned to remain diligent in adhering to the statutory timelines prescribed under the RTI Act, failing which disciplinary action will be recommended.",
+    "simple_text": "The officer received a formal warning to answer future RTI requests on time, or they will face departmental disciplinary penalties."
+  },
+  {
+    "complex_text": "The appellant is advised that grievances regarding non-receipt of pension cannot be resolved through RTI; the applicant should approach the Centralized Public Grievance Redress and Monitoring System (CPGRAMS).",
+    "simple_text": "RTI only provides government records and cannot directly fix a delayed pension. You should lodge a service complaint on the CPGRAMS grievance portal instead."
+  },
+  {
+    "complex_text": "The respondent shall provide the certified copy of the technical evaluation committee report along with comparative bid statements within two weeks of this order.",
+    "simple_text": "The department must provide certified copies of the contractor selection report and price comparisons within two weeks."
+  },
+  {
+    "complex_text": "Information received in confidence from a foreign government is strictly protected from disclosure under Section 8(1)(f) of the RTI Act.",
+    "simple_text": "Confidential documents received from a foreign nation or international body cannot be shared with the public."
+  },
+  {
+    "complex_text": "The CPIO is directed to verify the dispatch registers and tracking reports from the Department of Posts to establish whether the RTI response was actually mailed on the claimed date.",
+    "simple_text": "The officer must produce postal tracking receipts to prove that the reply letter was actually sent to you on the date they claimed."
+  },
+  {
+    "complex_text": "The public authority must intimate the calculation methodology for fees charged under Rule 4, clearly indicating page count, unit price, and mode of acceptable payment.",
+    "simple_text": "The department must clearly explain how they calculated your fees, stating the exact number of pages, rate per page, and payment options."
+  },
+  {
+    "complex_text": "Where the requested information is held by an intelligence or security organization specified in the Second Schedule, the provisions of the RTI Act do not apply as per Section 24, except in allegations of corruption and human rights violations.",
+    "simple_text": "Security and intelligence agencies (like IB or RAW) are exempt from RTI under Section 24, unless your request involves direct corruption or human rights abuses."
+  },
+  {
+    "complex_text": "The First Appellate Authority disposed of the first appeal ex-parte without according an opportunity of hearing to the appellant, violating the principles of natural justice.",
+    "simple_text": "The senior appeals officer improperly closed your appeal without letting you speak or present your side of the case."
+  },
+  {
+    "complex_text": "The public authority cannot withhold information merely because the file is marked 'Confidential' internally, unless it squarely falls within the exemptions listed under Section 8.",
+    "simple_text": "An office cannot hide a file just because it stamped it 'Confidential'. It must legally prove that one of the specific exemptions under Section 8 applies."
+  },
+  {
+    "complex_text": "The Commission directs the Registry to initiate penal proceedings against the deemed CPIO who failed to comply with previous orders despite repeated reminders.",
+    "simple_text": "The Commission has started penalty proceedings against the responsible officer who ignored earlier legal orders to release the records."
   }
 ]

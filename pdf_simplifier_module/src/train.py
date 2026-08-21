@@ -1,5 +1,12 @@
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, Seq2SeqTrainer, Seq2SeqTrainingArguments, DataCollatorForSeq2Seq
+from transformers import (
+    AutoTokenizer, 
+    AutoModelForSeq2SeqLM, 
+    Seq2SeqTrainer, 
+    Seq2SeqTrainingArguments, 
+    DataCollatorForSeq2Seq
+)
 from datasets import load_dataset
+import os
 
 def main():
     model_id = "google/flan-t5-base"
@@ -22,16 +29,18 @@ def main():
 
     tokenized_data = dataset.map(preprocess, batched=True)
 
+    os.makedirs("./models/saved_simplifier", exist_ok=True)
+
     training_args = Seq2SeqTrainingArguments(
         output_dir="./models/checkpoints",
         eval_strategy="epoch",
         learning_rate=5e-5,
-        per_device_train_batch_size=4,
-        per_device_eval_batch_size=4,
-        num_train_epochs=4,
+        per_device_train_batch_size=2,
+        per_device_eval_batch_size=2,
+        num_train_epochs=3,
         weight_decay=0.01,
         save_strategy="epoch",
-        logging_steps=10
+        logging_steps=5
     )
 
     trainer = Seq2SeqTrainer(
@@ -39,13 +48,14 @@ def main():
         args=training_args,
         train_dataset=tokenized_data["train"],
         eval_dataset=tokenized_data["validation"],
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         data_collator=DataCollatorForSeq2Seq(tokenizer, model=model)
     )
 
     trainer.train()
     model.save_pretrained("./models/saved_simplifier")
     tokenizer.save_pretrained("./models/saved_simplifier")
+    print("\n[SUCCESS] Model weights saved to ./models/saved_simplifier")
 
 if __name__ == "__main__":
     main()
