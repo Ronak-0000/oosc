@@ -1,5 +1,5 @@
-// Replace this with the URL of your Render Web Service (Backend)
-const BACKEND_API_URL = "https://caseloop1.onrender.com/simplify";
+// Ensure this matches your Render Web Service URL and endpoint path
+const BACKEND_API_URL = "https://caseloopb.onrender.com/api/simplify";
 
 const submitBtn = document.getElementById("submitBtn");
 const statusText = document.getElementById("statusText");
@@ -26,23 +26,30 @@ submitBtn.addEventListener("click", async () => {
             body: formData
         });
 
+        const rawText = await response.text();
+        console.log("Server HTTP Status:", response.status);
+        console.log("Raw Server Response:", rawText);
+
         if (!response.ok) {
-            throw new Error(`Server responded with status ${response.status}`);
+            throw new Error(`Server returned HTTP ${response.status}: ${rawText.slice(0, 200)}`);
         }
 
-        const data = await response.json();
+        const data = JSON.parse(rawText);
         statusText.innerText = "Success! Generated Points:";
         
-        // Display the results as bullet points
-        data.simplified_points.forEach(point => {
-            const li = document.createElement("li");
-            li.textContent = point;
-            resultsList.appendChild(li);
-        });
+        if (data.simplified_points && Array.isArray(data.simplified_points)) {
+            data.simplified_points.forEach(point => {
+                const li = document.createElement("li");
+                li.textContent = point;
+                resultsList.appendChild(li);
+            });
+        } else {
+            statusText.innerText = "Received response, but no points found.";
+        }
 
     } catch (error) {
         console.error("Connection failed:", error);
-        statusText.innerText = "Failed to connect to backend: " + error.message;
+        statusText.innerText = "Error: " + error.message;
     } finally {
         submitBtn.disabled = false;
     }
