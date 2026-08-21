@@ -1,9 +1,24 @@
-// Replace with your actual Render backend URL once deployed
-const BACKEND_API_URL = "https://caseloop.onrender.com";
+// Replace this with the URL of your Render Web Service (Backend)
+const BACKEND_API_URL = "https://caseloop1.onrender.com/";
 
-async function sendToBackend(pdfFile) {
+const submitBtn = document.getElementById("submitBtn");
+const statusText = document.getElementById("statusText");
+const resultsList = document.getElementById("resultsList");
+
+submitBtn.addEventListener("click", async () => {
+    const fileInput = document.getElementById("pdfInput").files[0];
+    
+    if (!fileInput) {
+        statusText.innerText = "Error: Please select a PDF file first.";
+        return;
+    }
+
     const formData = new FormData();
-    formData.append("file", pdfFile);
+    formData.append("file", fileInput);
+
+    statusText.innerText = "Sending to Render Backend (Please wait)...";
+    resultsList.innerHTML = "";
+    submitBtn.disabled = true;
 
     try {
         const response = await fetch(BACKEND_API_URL, {
@@ -11,14 +26,24 @@ async function sendToBackend(pdfFile) {
             body: formData
         });
 
-        if (!response.ok) throw new Error("Backend processing failed");
+        if (!response.ok) {
+            throw new Error(`Server responded with status ${response.status}`);
+        }
 
         const data = await response.json();
-        console.log("Simplified Points:", data.simplified_points);
+        statusText.innerText = "Success! Generated Points:";
         
-        // Add code here to display data.simplified_points in your UI
-        
+        // Display the results as bullet points
+        data.simplified_points.forEach(point => {
+            const li = document.createElement("li");
+            li.textContent = point;
+            resultsList.appendChild(li);
+        });
+
     } catch (error) {
-        console.error("Error connecting to backend:", error);
+        console.error("Connection failed:", error);
+        statusText.innerText = "Failed to connect to backend: " + error.message;
+    } finally {
+        submitBtn.disabled = false;
     }
-}
+});
