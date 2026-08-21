@@ -18,6 +18,7 @@ app.add_middleware(
 HF_SPACE_ID = "Ronak0/RC"
 client = Client(HF_SPACE_ID)
 
+@app.post("/simplify")
 @app.post("/api/simplify")
 async def simplify_pdf(file: UploadFile = File(...)):
     if not file.filename.lower().endswith(".pdf"):
