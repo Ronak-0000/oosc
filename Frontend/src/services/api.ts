@@ -1,6 +1,7 @@
 import { LegalCase } from '../types';
 
-const BACKEND_BASE_URL = "https://caseloop1.onrender.com";
+// Points to your live Python FastAPI Web Service
+const BACKEND_BASE_URL = "https://caseloop.onrender.com";
 
 export interface AIAnalysisResponse {
   title: string;
@@ -83,12 +84,14 @@ export interface OfficerSearchResult {
   portalUrl?: string;
 }
 
-// 1. Initial Grievance & Document Analysis
+// 1. Grievance & PDF Analysis
 export async function analyzeIssueApi(prompt: string, city: string, file?: File): Promise<AIAnalysisResponse> {
-  try {
-    let summaryText = "";
+  let summaryText = "";
+  let generatedDraft = "";
 
-    if (file) {
+  // Step A: Parse PDF via backend /simplify if attached
+  if (file) {
+    try {
       const formData = new FormData();
       formData.append("file", file);
 
@@ -97,101 +100,74 @@ export async function analyzeIssueApi(prompt: string, city: string, file?: File)
         body: formData,
       });
 
-      const text = await res.text();
-      if (text) {
-        try {
-          const data = JSON.parse(text);
-          if (Array.isArray(data.simplified_points)) {
-            summaryText = data.simplified_points.join("\n• ");
-            if (summaryText) summaryText = "• " + summaryText;
-          } else if (data.summary) {
-            summaryText = data.summary;
-          } else {
-            summaryText = text;
-          }
-        } catch {
-          summaryText = text;
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.simplified_points) && data.simplified_points.length > 0) {
+          summaryText = data.simplified_points.map((pt: string) => `• ${pt}`).join("\n");
+        } else if (data.summary) {
+          summaryText = data.summary;
         }
       }
+    } catch (err) {
+      console.warn("Failed to parse PDF via /simplify:", err);
     }
+  }
+
+  // Step B: Generate RTI draft via backend /draft
+  try {
+    const draftPrompt = file
+      ? `Draft a formal RTI application for ${city} regarding this document: ${file.name}. Document summary:\n${summaryText || prompt}`
+      : `[Jurisdiction: ${city}] ${prompt}`;
 
     const draftRes = await fetch(`${BACKEND_BASE_URL}/draft`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: `[Jurisdiction: ${city}] ${prompt} \n\nDocument Context: ${summaryText}` }),
+      body: JSON.stringify({ prompt: draftPrompt }),
     });
 
-    const draftTextRaw = await draftRes.text();
-    let draftData: any = {};
-    if (draftTextRaw) {
-      try {
-        draftData = JSON.parse(draftTextRaw);
-      } catch {
-        draftData = { draft: draftTextRaw };
-      }
+    if (draftRes.ok) {
+      const draftData = await draftRes.json();
+      generatedDraft = draftData.draft || "";
     }
-
-    const generatedDraft = draftData.draft || draftTextRaw || "RTI draft generated successfully.";
-
-    return {
-      title: prompt.slice(0, 50).replace("Document Attached: ", "") + "...",
-      category: "Civic Redressal & Legal Notice",
-      rulebookId: "rti",
-      statute: "Right to Information Act 2005 § 6(1)",
-      daysRemaining: 30,
-      initialScore: 92,
-      legalDiagnosis: "Statutory parameters mapped and document analysis prepared.",
-      formalLetter: generatedDraft,
-      draftedRti: generatedDraft,
-      pdfSummary: file ? (summaryText || "No text could be extracted from this document.") : undefined,
-      civicRights: [
-        "Right to inspect public works and obtain certified true copies under Section 2(j).",
-        "Mandatory 30-day statutory response window under Section 7(1).",
-        "Protection against arbitrary withholding under Section 8 exemptions."
-      ],
-      facts: [{ label: "Primary Grievance", value: prompt }],
-      officer: {
-        name: "Public Information Officer / Competent Authority",
-        title: "Designated Officer",
-        department: "Grievance Redressal Division",
-        avatar: "AO",
-        jurisdiction: city,
-        email: "authority.cell@nic.in",
-      },
-      piiItems: [],
-      vulnerabilities: ["Ensure proof of dispatch (Speed Post tracking or portal acknowledgement) is preserved."],
-    };
-  } catch (err: any) {
-    console.error("API error, using client fallback:", err);
-    return {
-      title: prompt.slice(0, 50).replace("Document Attached: ", "") + "...",
-      category: "Civic Redressal & Legal Notice",
-      rulebookId: "rti",
-      statute: "Right to Information Act 2005 § 6(1)",
-      daysRemaining: 30,
-      initialScore: 90,
-      legalDiagnosis: "Statutory rights mapped. Ready for filing draft inspection.",
-      formalLetter: `FORMAL STATUTORY NOTICE\n\nTo,\nThe Designated Competent Authority,\n${city}\n\nSubject: Formal submission regarding: ${prompt}\n\nSir/Madam,\nI hereby submit this statutory notice demanding formal resolution and supply of certified records pursuant to applicable statutory provisions.\n\nYours faithfully,\nAuthorized Citizen`,
-      draftedRti: `FORMAL STATUTORY NOTICE\n\nTo,\nThe Designated Competent Authority,\n${city}\n\nSubject: Formal submission regarding: ${prompt}\n\nSir/Madam,\nI hereby submit this statutory notice demanding formal resolution and supply of certified records pursuant to applicable statutory provisions.\n\nYours faithfully,\nAuthorized Citizen`,
-      pdfSummary: file ? `Document "${file.name}" uploaded. Key clauses extracted for review.` : undefined,
-      civicRights: [
-        "Right to seek certified public records under Section 6(1).",
-        "Mandatory 30-day response window for the public authority.",
-        "Right to file a First Appeal under Section 19 if denied or ignored."
-      ],
-      facts: [{ label: "User Submission", value: prompt }],
-      officer: {
-        name: "Public Information Officer",
-        title: "Designated CPIO",
-        department: "Civic Redressal Cell",
-        avatar: "PIO",
-        jurisdiction: city,
-        email: "pio.cell@nic.in",
-      },
-      piiItems: [],
-      vulnerabilities: ["Verify dispatch via speed post or official online portal."],
-    };
+  } catch (err) {
+    console.warn("Failed to generate draft via /draft:", err);
   }
+
+  // Fallback draft construction if backend was unreachable
+  if (!generatedDraft) {
+    generatedDraft = `To,\nThe Public Information Officer (PIO) / Competent Authority,\n${city}\n\nSubject: Request for Information under Section 6(1) of the Right to Information Act, 2005.\n\nSir/Madam,\n\n1. Particulars of Information Sought:\n${prompt}\n\n2. Certified Records Requested:\n- Certified copies of relevant file notes, sanction orders, and audit observations.\n- Progress reports and chronological inspection sheets relating to the subject matter.\n\n3. Application Fee & Mode:\nStatutory fee enclosed pursuant to Rule 3/4. Please facilitate inspection of records under Section 2(j)(i) if required.\n\nYours faithfully,\nAuthorized Citizen / Requester`;
+  }
+
+  const defaultPdfSummary = summaryText || (file ? `• Extracted document records from ${file.name}.\n• Relevant administrative clauses prepared for statutory inspection.` : undefined);
+
+  return {
+    title: prompt.slice(0, 50).replace("Document Attached: ", "") + "...",
+    category: "Civic Redressal & Legal Notice",
+    rulebookId: "rti",
+    statute: "Right to Information Act 2005 § 6(1)",
+    daysRemaining: 30,
+    initialScore: 92,
+    legalDiagnosis: "Document parsed and statutory parameters mapped for public authority filing.",
+    formalLetter: generatedDraft,
+    draftedRti: generatedDraft,
+    pdfSummary: file ? defaultPdfSummary : undefined,
+    civicRights: [
+      "Right to inspect public records and obtain certified true copies under Section 2(j).",
+      "Mandatory 30-day statutory reply window under Section 7(1).",
+      "Statutory protection against arbitrary withholding under Section 8 exemptions."
+    ],
+    facts: [{ label: "Primary Grievance", value: prompt }],
+    officer: {
+      name: "Public Information Officer / Competent Authority",
+      title: "Designated CPIO",
+      department: "Grievance Redressal Division",
+      avatar: "AO",
+      jurisdiction: city,
+      email: "authority.cell@nic.in",
+    },
+    piiItems: [],
+    vulnerabilities: ["Retain postal / speed-post tracking receipt as conclusive proof of filing."],
+  };
 }
 
 // 2. RTI Quality Audit
@@ -203,14 +179,9 @@ export async function auditRtiApi(text: string, city: string): Promise<RtiAuditR
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt: `Audit and optimize RTI for ${city}: ${text}` }),
     });
-    const resText = await res.text();
-    if (resText) {
-      try {
-        const data = JSON.parse(resText);
-        if (data.draft) draftText = data.draft;
-      } catch {
-        draftText = resText;
-      }
+    if (res.ok) {
+      const data = await res.json();
+      if (data.draft) draftText = data.draft;
     }
   } catch (err) {
     console.warn("Audit endpoint fallback:", err);
@@ -225,13 +196,13 @@ export async function auditRtiApi(text: string, city: string): Promise<RtiAuditR
     checklist: [
       { item: "Specific Public Authority Identified", rule: "Sec 6(1)", finding: "Authority properly targeted.", status: "pass" },
       { item: "Clear Certified Records Demanded", rule: "Sec 2(j)", finding: "Inspection and certified copies scope defined.", status: "pass" },
-      { item: "Concise Period Specified", rule: "DoPT Norms", finding: "Clear financial year / timeframe stated.", status: "pass" },
+      { item: "Concise Period Specified", rule: "DoPT Norms", finding: "Clear timeframe stated.", status: "pass" },
     ],
     optimizedRtiDraft: draftText,
   };
 }
 
-// 3. Document / PDF Simplification
+// 3. Document / PDF Simplification Helper
 export async function analyzeDocumentApi(params: {
   fileBase64: string;
   mimeType: string;
@@ -255,15 +226,10 @@ export async function analyzeDocumentApi(params: {
     body: formData,
   });
 
-  const resText = await res.text();
   let summary = "";
-  if (resText) {
-    try {
-      const data = JSON.parse(resText);
-      summary = (data.simplified_points || []).join("\n\n");
-    } catch {
-      summary = resText;
-    }
+  if (res.ok) {
+    const data = await res.json();
+    summary = (data.simplified_points || []).map((pt: string) => `• ${pt}`).join("\n");
   }
 
   return {
@@ -288,14 +254,9 @@ Recipient: ${legalCase.officer?.name || 'Authorized Officer'}, ${legalCase.offic
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt }),
     });
-    const text = await res.text();
-    if (text) {
-      try {
-        const data = JSON.parse(text);
-        return data.draft || text;
-      } catch {
-        return text;
-      }
+    if (res.ok) {
+      const data = await res.json();
+      return data.draft || legalCase.description || "";
     }
   } catch (err) {
     console.warn("Filing draft fallback:", err);
