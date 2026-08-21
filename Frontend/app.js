@@ -1,5 +1,5 @@
 // Replace with your actual Render backend URL once deployed
-const BACKEND_API_URL = "https://your-render-backend-url.onrender.com/api/simplify";
+const BACKEND_API_URL = "https://caseloop.onrender.com";
 
 async function sendToBackend(pdfFile) {
     const formData = new FormData();
