@@ -11,7 +11,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-MODEL_REPO = "Ronak0/rti-pdf-simplifier"
+MODEL_REPO = "CaseLoop/pdf"
 FALLBACK_BASE_MODEL = "google/flan-t5-base"
 
 # Initialize Tokenizer with fallback
