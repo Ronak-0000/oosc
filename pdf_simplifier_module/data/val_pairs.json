@@ -1,1 +1,10 @@
-# Validation dataset (JSON array)
+[
+  {
+    "complex_text": "Any person aggrieved by a decision of the Public Information Officer may prefer an appeal under Section 19(1) of the RTI Act within thirty days from the expiry of the prescribed period.",
+    "simple_text": "If you are unhappy with the officer's reply or received no response, you can file a First Appeal within 30 days under Section 19(1)."
+  },
+  {
+    "complex_text": "Under Section 8(1)(a), information disclosure prejudicially affecting the sovereignty and integrity of India, the security, or strategic interests of the State is exempted from disclosure.",
+    "simple_text": "Information cannot be shared if releasing it could harm national security, strategic interests, or the sovereignty of India."
+  }
+]
