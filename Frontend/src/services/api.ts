@@ -50,7 +50,7 @@ export interface RtiAuditResponse {
   optimizedRtiDraft: string;
 }
 
-export interface StressTestResponse {
+export interface AIStressTestResponse {
   score: number;
   statusBadge: string;
   statusType: 'success' | 'warning' | 'urgent';
@@ -59,10 +59,25 @@ export interface StressTestResponse {
   optimizedDraft?: string;
 }
 
-export interface DecodedResponseResult {
+export type StressTestResponse = AIStressTestResponse;
+
+export interface AIDecodedResponse {
   diagnosis: string;
   nextSteps: string[];
   actionRequired: string;
+}
+
+export type DecodedResponseResult = AIDecodedResponse;
+
+export interface OfficerSearchResult {
+  name: string;
+  title: string;
+  department: string;
+  avatar?: string;
+  jurisdiction?: string;
+  email?: string;
+  address?: string;
+  portalUrl?: string;
 }
 
 // 1. Initial Grievance Analysis
@@ -181,7 +196,7 @@ Recipient: ${legalCase.officer?.name || 'Authorized Officer'}, ${legalCase.offic
 }
 
 // 5. Stress Test & Viability Audit
-export async function stressTestApi(legalCase: LegalCase): Promise<StressTestResponse> {
+export async function stressTestApi(legalCase: LegalCase): Promise<AIStressTestResponse> {
   return {
     score: Math.min(100, (legalCase.score || 85) + 5),
     statusBadge: "Stress Tested",
@@ -199,7 +214,7 @@ export async function stressTestApi(legalCase: LegalCase): Promise<StressTestRes
 }
 
 // 6. Response Decoder & Interpretation
-export async function interpretResponseApi(responseText: string): Promise<DecodedResponseResult> {
+export async function interpretResponseApi(responseText: string): Promise<AIDecodedResponse> {
   return {
     diagnosis: "Administrative acknowledgment received. Statutory reply window is active.",
     nextSteps: [
@@ -208,4 +223,18 @@ export async function interpretResponseApi(responseText: string): Promise<Decode
     ],
     actionRequired: "Monitor compliance timeline in CaseLoop tracker.",
   };
+}
+
+// 7. Search Officer Helper
+export async function searchOfficerApi(query: string, city: string): Promise<OfficerSearchResult[]> {
+  return [
+    {
+      name: "Public Information Officer (PIO)",
+      title: "Designated CPIO",
+      department: `${query || 'Civic'} Grievance Cell`,
+      jurisdiction: city,
+      email: "pio.cell@nic.in",
+      avatar: "PIO",
+    }
+  ];
 }
