@@ -107,8 +107,8 @@ export async function analyzeIssueApi(prompt: string, city: string, file?: File)
             summaryText = parsed.simplified_points.map((pt: string) => `• ${pt}`).join("\n\n");
           } else if (parsed.summary) {
             summaryText = parsed.summary;
-          } else {
-            summaryText = rawSimplify;
+          } else if (typeof parsed === 'string') {
+            summaryText = parsed;
           }
         } catch {
           summaryText = rawSimplify;
@@ -119,12 +119,12 @@ export async function analyzeIssueApi(prompt: string, city: string, file?: File)
     }
   }
 
-  // Step B: Generate structured RTI application using /draft model
-  try {
-    const draftPrompt = file
-      ? `Draft a formal, comprehensive Right to Information (RTI) application under Section 6(1) of the RTI Act 2005 for ${city} based on these extracted document facts:\n\n${summaryText || prompt}`
-      : `[Jurisdiction: ${city}] Draft a formal Right to Information (RTI) application under Section 6(1) of RTI Act 2005 for:\n${prompt}`;
+  // Step B: Call the RTI Drafter Model via /draft
+  const draftPrompt = file
+    ? `Draft a formal Right to Information (RTI) application under Section 6(1) of the RTI Act 2005 for ${city} based on these document facts:\n${summaryText || prompt}`
+    : `[Jurisdiction: ${city}] Draft a formal Right to Information (RTI) application under Section 6(1) of the RTI Act 2005 for:\n${prompt}`;
 
+  try {
     const draftRes = await fetch(`${BACKEND_BASE_URL}/draft`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -135,7 +135,22 @@ export async function analyzeIssueApi(prompt: string, city: string, file?: File)
       const rawDraft = await draftRes.text();
       try {
         const parsedDraft = JSON.parse(rawDraft);
-        generatedDraft = parsedDraft.draft || rawDraft;
+
+        // Handle Hugging Face array response [{ generated_text: "..." }]
+        if (Array.isArray(parsedDraft) && parsedDraft.length > 0) {
+          generatedDraft = parsedDraft[0].generated_text || parsedDraft[0].draft || parsedDraft[0].text || "";
+        } 
+        // Handle standard key formats from FastAPI wrappers
+        else if (typeof parsedDraft === 'object' && parsedDraft !== null) {
+          generatedDraft = parsedDraft.draft || parsedDraft.generated_text || parsedDraft.output || parsedDraft.response || "";
+        } else if (typeof parsedDraft === 'string') {
+          generatedDraft = parsedDraft;
+        }
+
+        // Clean out echoed input prompt if present in model generation
+        if (generatedDraft.startsWith(draftPrompt)) {
+          generatedDraft = generatedDraft.replace(draftPrompt, "").trim();
+        }
       } catch {
         generatedDraft = rawDraft;
       }
@@ -144,10 +159,38 @@ export async function analyzeIssueApi(prompt: string, city: string, file?: File)
     console.warn("Failed to generate RTI draft via /draft:", err);
   }
 
-  // Step C: Fallback formatted draft if backend model was unreachable
-  if (!generatedDraft || generatedDraft.trim().startsWith("{")) {
-    generatedDraft = `BEFORE THE PUBLIC INFORMATION OFFICER (PIO) / COMPETENT AUTHORITY\nJurisdiction: ${city}\n\nAPPLICATION UNDER SECTION 6(1) OF THE RIGHT TO INFORMATION ACT, 2005\n\n1. Particulars of the Applicant:\n   Name: [Authorized Citizen / Requester]\n   Address: [Protected / Auto-Redacted]\n\n2. Details of Information Sought:\n   Regarding: ${file ? file.name : prompt}\n\n${summaryText ? `   Certified records requested pursuant to extracted document parameters:\n${summaryText}\n` : `   - Certified copies of relevant file notings, orders, and correspondence.\n   - Complete inspection of records under Section 2(j)(i) of the RTI Act 2005.\n`}
-3. Application Fee Details:\n   Statutory application fee of ₹10/- remitted via prescribed mode.\n\n4. Disclosure Norms:\n   The information sought does not fall under any exemption specified in Section 8 or 9 of the RTI Act, 2005.\n\nPlace: ${city}\nDate: ${new Date().toLocaleDateString('en-IN')}\n\nApplicant Signature\n[CaseLoop Verified Requester]`;
+  // Step C: Fallback clean RTI draft template if model response was empty or echoed
+  if (!generatedDraft || generatedDraft.length < 30 || generatedDraft.startsWith("{") || generatedDraft.startsWith("Draft RTI/civic document")) {
+    generatedDraft = `BEFORE THE PUBLIC INFORMATION OFFICER (PIO) / COMPETENT AUTHORITY
+Department / Authority: Department of Expenditure / Civic Authority
+Jurisdiction: ${city}
+
+APPLICATION UNDER SECTION 6(1) OF THE RIGHT TO INFORMATION ACT, 2005
+
+1. Particulars of the Applicant:
+   Name: [Citizen / Requester]
+   Address: [Protected / Auto-Redacted]
+
+2. Particulars of Information Sought:
+   Subject: Certified Records & Expenditure Details concerning ${file ? file.name : prompt}
+
+   Specific Demands:
+${summaryText ? summaryText.split('\n').map(l => `   ${l}`).join('\n') : '   • Certified copies of sanction orders, expenditure approvals, and audit notes.\n   • Inspection of original project records and register sheets under Section 2(j)(i).'}
+
+3. Period to Which Information Relates:
+   Relevant Financial Years (2023–24 to 2025–26)
+
+4. Application Fee:
+   Statutory fee of ₹10/- remitted via prescribed mode (IPO / Online Portal).
+
+5. Declaration:
+   The information sought falls strictly under public scrutiny norms and does not attract any exemption under Section 8 or 9 of the RTI Act, 2005.
+
+Place: ${city}
+Date: ${new Date().toLocaleDateString('en-IN')}
+
+Yours faithfully,
+Authorized Citizen / Requester`;
   }
 
   return {
@@ -157,10 +200,10 @@ export async function analyzeIssueApi(prompt: string, city: string, file?: File)
     statute: "Right to Information Act 2005 § 6(1)",
     daysRemaining: 30,
     initialScore: 95,
-    legalDiagnosis: "Document parsed and statutory parameters mapped for public authority filing.",
+    legalDiagnosis: "Document parsed and statutory RTI parameters structured for public authority filing.",
     formalLetter: generatedDraft,
     draftedRti: generatedDraft,
-    pdfSummary: file ? (summaryText || `Extracted statutory points from ${file.name}.`) : undefined,
+    pdfSummary: file ? (summaryText || `Extracted document records from ${file.name}.`) : undefined,
     civicRights: [
       "Right to inspect public works and obtain certified true copies under Section 2(j).",
       "Mandatory 30-day statutory response window under Section 7(1).",
