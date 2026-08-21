@@ -1,6 +1,5 @@
 import { LegalCase } from '../types';
 
-// Points to your live Python FastAPI Web Service
 const BACKEND_BASE_URL = "https://caseloop.onrender.com";
 
 export interface AIAnalysisResponse {
@@ -84,40 +83,47 @@ export interface OfficerSearchResult {
   portalUrl?: string;
 }
 
-// 1. Grievance & PDF Analysis
+// 1. Initial Grievance & Document Analysis
 export async function analyzeIssueApi(prompt: string, city: string, file?: File): Promise<AIAnalysisResponse> {
   let summaryText = "";
   let generatedDraft = "";
 
-  // Step A: Parse PDF via backend /simplify if attached
+  // Step A: Parse PDF with /simplify endpoint
   if (file) {
     try {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await fetch(`${BACKEND_BASE_URL}/simplify`, {
+      const simplifyRes = await fetch(`${BACKEND_BASE_URL}/simplify`, {
         method: "POST",
         body: formData,
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data.simplified_points) && data.simplified_points.length > 0) {
-          summaryText = data.simplified_points.map((pt: string) => `• ${pt}`).join("\n");
-        } else if (data.summary) {
-          summaryText = data.summary;
+      if (simplifyRes.ok) {
+        const rawSimplify = await simplifyRes.text();
+        try {
+          const parsed = JSON.parse(rawSimplify);
+          if (Array.isArray(parsed.simplified_points) && parsed.simplified_points.length > 0) {
+            summaryText = parsed.simplified_points.map((pt: string) => `• ${pt}`).join("\n\n");
+          } else if (parsed.summary) {
+            summaryText = parsed.summary;
+          } else {
+            summaryText = rawSimplify;
+          }
+        } catch {
+          summaryText = rawSimplify;
         }
       }
     } catch (err) {
-      console.warn("Failed to parse PDF via /simplify:", err);
+      console.warn("Failed to process document with /simplify:", err);
     }
   }
 
-  // Step B: Generate RTI draft via backend /draft
+  // Step B: Generate structured RTI application using /draft model
   try {
     const draftPrompt = file
-      ? `Draft a formal RTI application for ${city} regarding this document: ${file.name}. Document summary:\n${summaryText || prompt}`
-      : `[Jurisdiction: ${city}] ${prompt}`;
+      ? `Draft a formal, comprehensive Right to Information (RTI) application under Section 6(1) of the RTI Act 2005 for ${city} based on these extracted document facts:\n\n${summaryText || prompt}`
+      : `[Jurisdiction: ${city}] Draft a formal Right to Information (RTI) application under Section 6(1) of RTI Act 2005 for:\n${prompt}`;
 
     const draftRes = await fetch(`${BACKEND_BASE_URL}/draft`, {
       method: "POST",
@@ -126,42 +132,46 @@ export async function analyzeIssueApi(prompt: string, city: string, file?: File)
     });
 
     if (draftRes.ok) {
-      const draftData = await draftRes.json();
-      generatedDraft = draftData.draft || "";
+      const rawDraft = await draftRes.text();
+      try {
+        const parsedDraft = JSON.parse(rawDraft);
+        generatedDraft = parsedDraft.draft || rawDraft;
+      } catch {
+        generatedDraft = rawDraft;
+      }
     }
   } catch (err) {
-    console.warn("Failed to generate draft via /draft:", err);
+    console.warn("Failed to generate RTI draft via /draft:", err);
   }
 
-  // Fallback draft construction if backend was unreachable
-  if (!generatedDraft) {
-    generatedDraft = `To,\nThe Public Information Officer (PIO) / Competent Authority,\n${city}\n\nSubject: Request for Information under Section 6(1) of the Right to Information Act, 2005.\n\nSir/Madam,\n\n1. Particulars of Information Sought:\n${prompt}\n\n2. Certified Records Requested:\n- Certified copies of relevant file notes, sanction orders, and audit observations.\n- Progress reports and chronological inspection sheets relating to the subject matter.\n\n3. Application Fee & Mode:\nStatutory fee enclosed pursuant to Rule 3/4. Please facilitate inspection of records under Section 2(j)(i) if required.\n\nYours faithfully,\nAuthorized Citizen / Requester`;
+  // Step C: Fallback formatted draft if backend model was unreachable
+  if (!generatedDraft || generatedDraft.trim().startsWith("{")) {
+    generatedDraft = `BEFORE THE PUBLIC INFORMATION OFFICER (PIO) / COMPETENT AUTHORITY\nJurisdiction: ${city}\n\nAPPLICATION UNDER SECTION 6(1) OF THE RIGHT TO INFORMATION ACT, 2005\n\n1. Particulars of the Applicant:\n   Name: [Authorized Citizen / Requester]\n   Address: [Protected / Auto-Redacted]\n\n2. Details of Information Sought:\n   Regarding: ${file ? file.name : prompt}\n\n${summaryText ? `   Certified records requested pursuant to extracted document parameters:\n${summaryText}\n` : `   - Certified copies of relevant file notings, orders, and correspondence.\n   - Complete inspection of records under Section 2(j)(i) of the RTI Act 2005.\n`}
+3. Application Fee Details:\n   Statutory application fee of ₹10/- remitted via prescribed mode.\n\n4. Disclosure Norms:\n   The information sought does not fall under any exemption specified in Section 8 or 9 of the RTI Act, 2005.\n\nPlace: ${city}\nDate: ${new Date().toLocaleDateString('en-IN')}\n\nApplicant Signature\n[CaseLoop Verified Requester]`;
   }
-
-  const defaultPdfSummary = summaryText || (file ? `• Extracted document records from ${file.name}.\n• Relevant administrative clauses prepared for statutory inspection.` : undefined);
 
   return {
     title: prompt.slice(0, 50).replace("Document Attached: ", "") + "...",
-    category: "Civic Redressal & Legal Notice",
+    category: "Public Records & RTI Notice",
     rulebookId: "rti",
     statute: "Right to Information Act 2005 § 6(1)",
     daysRemaining: 30,
-    initialScore: 92,
+    initialScore: 95,
     legalDiagnosis: "Document parsed and statutory parameters mapped for public authority filing.",
     formalLetter: generatedDraft,
     draftedRti: generatedDraft,
-    pdfSummary: file ? defaultPdfSummary : undefined,
+    pdfSummary: file ? (summaryText || `Extracted statutory points from ${file.name}.`) : undefined,
     civicRights: [
-      "Right to inspect public records and obtain certified true copies under Section 2(j).",
-      "Mandatory 30-day statutory reply window under Section 7(1).",
+      "Right to inspect public works and obtain certified true copies under Section 2(j).",
+      "Mandatory 30-day statutory response window under Section 7(1).",
       "Statutory protection against arbitrary withholding under Section 8 exemptions."
     ],
-    facts: [{ label: "Primary Grievance", value: prompt }],
+    facts: [{ label: "Primary Grievance / Document", value: file ? file.name : prompt }],
     officer: {
       name: "Public Information Officer / Competent Authority",
       title: "Designated CPIO",
       department: "Grievance Redressal Division",
-      avatar: "AO",
+      avatar: "PIO",
       jurisdiction: city,
       email: "authority.cell@nic.in",
     },
@@ -229,7 +239,9 @@ export async function analyzeDocumentApi(params: {
   let summary = "";
   if (res.ok) {
     const data = await res.json();
-    summary = (data.simplified_points || []).map((pt: string) => `• ${pt}`).join("\n");
+    if (Array.isArray(data.simplified_points)) {
+      summary = data.simplified_points.map((pt: string) => `• ${pt}`).join("\n\n");
+    }
   }
 
   return {
