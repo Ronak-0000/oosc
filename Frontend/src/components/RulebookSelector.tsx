@@ -123,7 +123,7 @@ ${aiAnalysis.legalDiagnosis}`;
 
   const handleCopyRtiDraft = () => {
     if (!aiAnalysis) return;
-    const textToCopy = aiAnalysis.draftedRti || aiAnalysis.formalLetter;
+    const textToCopy = aiAnalysis.draftedRti || aiAnalysis.formalLetter || '';
     navigator.clipboard.writeText(textToCopy);
     setCopiedRtiDraft(true);
     setTimeout(() => setCopiedRtiDraft(false), 2500);
@@ -155,7 +155,7 @@ ${aiAnalysis.legalDiagnosis}`;
           />
         </h1>
 
-        {/* Subheading with Badge Box */}
+        {/* Subheading with Rotating Badge */}
         <div className="text-[15px] sm:text-[17px] text-[#475569] leading-normal flex flex-wrap items-center justify-center gap-2 max-w-3xl">
           <span>Generate statutory legal notices and filings for</span>
           <div className="inline-flex items-center justify-center min-h-[38px] px-3.5 py-1 rounded-lg bg-white text-[#006c4a] border border-[#CBD5E1] shadow-xs">
@@ -193,7 +193,7 @@ ${aiAnalysis.legalDiagnosis}`;
           </button>
         </div>
 
-        {/* Search & Issue Description Bar with Integrated PDF Upload */}
+        {/* Search & PDF Attachment Bar */}
         <div className="w-full flex flex-col gap-2 mt-3">
           <div className="w-full relative group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#64748B] z-20">
@@ -228,7 +228,7 @@ ${aiAnalysis.legalDiagnosis}`;
               </div>
             )}
 
-            {/* Clear Text button */}
+            {/* Clear button */}
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
@@ -239,9 +239,8 @@ ${aiAnalysis.legalDiagnosis}`;
               </button>
             )}
 
-            {/* Action Group: PDF Upload Button + Analyze Button */}
+            {/* Action Group: PDF Upload + Analyze */}
             <div className="absolute inset-y-2 right-2 flex items-center gap-1.5 z-20">
-              {/* PDF File Input (Hidden) */}
               <input
                 ref={fileInputRef}
                 type="file"
@@ -251,7 +250,6 @@ ${aiAnalysis.legalDiagnosis}`;
                 className="hidden"
               />
 
-              {/* PDF Upload Button */}
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
@@ -268,7 +266,6 @@ ${aiAnalysis.legalDiagnosis}`;
                 <span className="hidden sm:inline">{selectedPdf ? 'PDF Attached' : 'Attach PDF'}</span>
               </button>
 
-              {/* Analyze Button */}
               <button
                 onClick={() => handleAnalyze()}
                 disabled={analyzing}
@@ -289,7 +286,7 @@ ${aiAnalysis.legalDiagnosis}`;
             </div>
           </div>
 
-          {/* Selected PDF Badge Bar */}
+          {/* Attached File Indicator */}
           {selectedPdf && (
             <div className="flex items-center justify-between bg-[#F0FDF4] border border-[#BBF7D0] px-3.5 py-1.5 rounded-lg text-[13px] text-[#166534] animate-in fade-in duration-200">
               <div className="flex items-center gap-2 truncate">
@@ -344,10 +341,10 @@ ${aiAnalysis.legalDiagnosis}`;
           </div>
         )}
 
-        {/* Redesigned, Simplified AI Analysis Results Panel */}
+        {/* AI Analysis Results Dashboard */}
         {aiAnalysis && (
           <div className="w-full text-left bg-white border border-[#CBD5E1] rounded-2xl p-6 sm:p-7 shadow-md animate-in fade-in slide-in-from-top-4 duration-300 flex flex-col gap-5">
-            {/* Header: Clean Summary & Badges */}
+            {/* Header Strip */}
             <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#E2E8F0]">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1 text-[12px] font-bold text-[#006c4a] bg-[#ECFDF5] px-3 py-1 rounded-full border border-[#A7F3D0]">
@@ -382,7 +379,7 @@ ${aiAnalysis.legalDiagnosis}`;
               </p>
             </div>
 
-            {/* 1. Civic Rights Box (Replaces old Extracted Legal Facts) */}
+            {/* 1. Civic Rights Box */}
             <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl p-4 sm:p-5 flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <h3 className="font-headline text-[15.5px] font-bold text-[#166534] flex items-center gap-2">
@@ -412,9 +409,9 @@ ${aiAnalysis.legalDiagnosis}`;
               </ul>
             </div>
 
-            {/* 2. Document Summary Box (Shown IF user uploaded a PDF or pdfSummary is available) */}
+            {/* 2. Document Summary Box */}
             {(aiAnalysis.pdfSummary || selectedPdf) && (
-              <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl p-4 sm:p-5 flex flex-col gap-2.5">
+              <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl p-4 sm:p-5 flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-headline text-[15px] font-bold text-[#1E40AF] flex items-center gap-2">
                     <span className="material-symbols-outlined text-[#2563EB] text-[20px]">description</span>
@@ -424,13 +421,13 @@ ${aiAnalysis.legalDiagnosis}`;
                     {selectedPdf ? selectedPdf.name : 'Analyzed Document'}
                   </span>
                 </div>
-                <div className="text-[13.5px] text-[#1E3A8A] leading-relaxed whitespace-pre-line bg-white/70 p-3 rounded-lg border border-[#DBEAFE]">
+                <div className="text-[13.5px] text-[#1E3A8A] leading-relaxed whitespace-pre-wrap bg-white/80 p-3.5 rounded-lg border border-[#DBEAFE]">
                   {aiAnalysis.pdfSummary || `Uploaded file "${selectedPdf?.name}" was analyzed and distilled into actionable civic rights and RTI queries.`}
                 </div>
               </div>
             )}
 
-            {/* 3. Drafted RTI Application Box (Prominent) */}
+            {/* 3. Drafted RTI Application Box */}
             <div className="bg-white border border-[#CBD5E1] rounded-xl p-4 sm:p-5 flex flex-col gap-3 shadow-xs">
               <div className="flex items-center justify-between gap-2">
                 <h3 className="font-headline text-[15.5px] font-bold text-[#0F172A] flex items-center gap-2">
@@ -457,7 +454,7 @@ ${aiAnalysis.legalDiagnosis}`;
               </div>
             </div>
 
-            {/* Routing Authority & Protections Bar (Streamlined) */}
+            {/* Routing Authority & Protections Bar */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <div className="p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-[#ECFDF5] text-[#006c4a] flex items-center justify-center font-bold text-[13px] shrink-0">
