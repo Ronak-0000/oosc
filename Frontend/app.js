@@ -1,5 +1,5 @@
 // Ensure this matches your Render Web Service URL and endpoint path
-const BACKEND_API_URL = "https://caseloopb.onrender.com/simplify";
+const BACKEND_API_URL = "https://caseloop.onrender.com/simplify";
 
 const submitBtn = document.getElementById("submitBtn");
 const statusText = document.getElementById("statusText");
