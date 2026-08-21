@@ -18,13 +18,13 @@ app.add_middleware(
 
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-# Model 1: PDF Simplifier Space
+# Model 1: PDF Simplifier Space (using `token=` parameter)
 SIMPLIFIER_SPACE_ID = "Ronak0/RC"
-simplifier_client = Client(SIMPLIFIER_SPACE_ID, hf_token=HF_TOKEN)
+simplifier_client = Client(SIMPLIFIER_SPACE_ID, token=HF_TOKEN)
 
-# Model 2: RTI Drafter Space
+# Model 2: RTI Drafter Space (using `token=` parameter)
 DRAFTER_SPACE_ID = "Ronak0/rti-drafter"
-drafter_client = Client(DRAFTER_SPACE_ID, hf_token=HF_TOKEN)
+drafter_client = Client(DRAFTER_SPACE_ID, token=HF_TOKEN)
 
 
 class DraftRequest(BaseModel):
